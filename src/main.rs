@@ -2,7 +2,9 @@ mod config;
 mod database;
 mod entity;
 mod logger;
+mod server;
 
+use std::error;
 use crate::entity::sys_user;
 use axum::extract::State;
 use axum::response::IntoResponse;
@@ -17,6 +19,7 @@ use tokio::net::TcpListener;
 #[tokio::main]
 async fn main() {
     logger::init();
+
 
     // 数据库初始化
     let db = database::init_database()
