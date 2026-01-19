@@ -1,8 +1,11 @@
 use crate::config::ServerConfig;
+use crate::App::AppState;
 use anyhow::Context;
-use axum::Router;
+use axum::{debug_handler, routing, Router};
 use sea_orm::Iden;
 use tokio::net::TcpListener;
+use tracing::instrument::WithSubscriber;
+use tracing_subscriber::Registry;
 
 pub struct Server {
     config: &'static ServerConfig,
@@ -13,12 +16,12 @@ impl Server {
         Server { config }
     }
 
-    pub fn build_router(&self) -> Router {
-        todo!()
+    pub fn build_router(&self, state: AppState, router: Router<AppState>) -> Router {
+        axum::Router::new().merge(router).with_state(state)
     }
 
-    pub async fn start(&self) -> anyhow::Result<()> {
-        let router = self.build_router();
+    pub async fn start(&self, state: AppState, router: Router<AppState>) -> anyhow::Result<()> {
+        let router = self.build_router(state, router);
 
         let port = self.config.port();
 

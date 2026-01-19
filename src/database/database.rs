@@ -5,6 +5,7 @@ use sea_orm::{
 use serde::de::Unexpected::Str;
 use std::cmp::max;
 use std::time::Duration;
+use anyhow::Context;
 
 pub async fn init_database() -> anyhow::Result<DatabaseConnection> {
     let database_config = config::config().database();
@@ -30,7 +31,8 @@ pub async fn init_database() -> anyhow::Result<DatabaseConnection> {
         .max_lifetime(Duration::from_secs(8))
         .sqlx_logging(false);
 
-    let db = Database::connect(options).await?;
+    let db = Database::connect(options).await
+        .with_context(|| "failed to connect to database")?;
 
     tracing::info!("database connection established");
 
