@@ -10,6 +10,8 @@ mod logger;
 mod response;
 mod server;
 
+mod common;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     App::run(create_api_router()).await
