@@ -1,19 +1,19 @@
-
-use crate::entity::prelude::*;
 use crate::App::AppState;
+use crate::entity::prelude::*;
+use crate::entity::sys_user;
+use crate::error::ApiResult;
+use crate::response::ApiResponse;
 use axum::extract::State;
-use axum::response::IntoResponse;
-use axum::{debug_handler, routing, Router};
+use axum::{Router, debug_handler, routing};
 use sea_orm::prelude::*;
 use sea_orm::{Condition, EntityTrait};
-use crate::entity::sys_user;
 
 pub fn create_router() -> Router<AppState> {
     Router::new().route("/user-all", routing::get(query_all_user))
 }
 
 #[debug_handler]
-async fn query_all_user(state: State<AppState>) -> impl IntoResponse {
+async fn query_all_user(state: State<AppState>) -> ApiResult<ApiResponse<Vec<sys_user::Model>>> {
     let users = SysUser::find()
         .filter(
             Condition::any()
@@ -21,7 +21,6 @@ async fn query_all_user(state: State<AppState>) -> impl IntoResponse {
                 .add(sys_user::Column::NickName.eq("李超".to_string())),
         )
         .all(&state.0.db)
-        .await
-        .unwrap();
-    axum::Json(users)
+        .await?;
+    Ok(ApiResponse::ok("ok", Some(users)))
 }
